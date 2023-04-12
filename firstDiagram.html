@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style2.css">
+</head>
+
+<body>
+
+    <div class="header">
+        <img src="img\signon.svg" alt="Logo">
+        <h5>SIGNON Deutschland GmbH</h1>
+    </div>
+    <div class="menu_container">
+        <div class="btn_container">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="over_lay"></div>
+        <div class="list_items_container">
+            <p class="close_btn">X</p>
+            <div class="list_box">
+                <div class="col-lg-4 mt-4 mt-lg-0">
+                    <ul id="tree2">
+                        <li><a href="javascript:void(0)">Seitenbaum</a>
+                            <ul>
+
+                                <li><a href="TkEinzeltechnick.html">TK-Einzeltechnick</a>
+                                    <ul>
+                                        <li><a href="BOS.html">BOS-Funk</a>
+                                            <ul>
+                                                <li><a href="DBS&S.html">DB S&S</a>
+                                                    <ul>
+                                                        <li><a href="chicks.html">Musterplanung & Planverzeichnis</a></li>
+                                                        <li><a href="chicks.html">Preisermittlung</a></li>
+                                                        <li><a href="DBS&SLastSeite.html">Komponentenliste zur Typfreigabe</a></li>
+                                                        <li><a href="DBS&SLastSeite.html">Hersteller Kontaktdaten</a>
+                                                        </li>
+                                                        <li><a href="DBS&SLastSeite.html">Datenblätter</a></li>
+                                                    </ul>
+                                                </li>
+                                                <li><a href="DBNetz.html">DB Netz</a>
+                                                    <ul>
+                                                        <li><a href="chickss.html">Musterplanung & Planverzeichnis</a></li>
+                                                        <li><a href="chickss.html">Preisermittlung</a></li>
+                                                        <li><a href="DBNetzLastSeit.html">Komponentenliste zur Typfreigabe</a></li>
+                                                        <li><a href="DBNetzLastSeit.html">Hersteller Kontaktdaten</a>
+                                                        </li>
+                                                        <li><a href="DBNetzLastSeit.html">Datenblätter</a></li>
+                                                    </ul>
+                                                </li>
+
+                                            </ul>
+                                        </li>
+
+                                    </ul>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <h1 style="margin-left: auto;
+        margin-right: auto;">Telekommunikation Systemarchitektur</h1>
+
+        <div class="button-grid">
+
+            <a href="TkEinzeltechnick.html">
+                <button>TK-Einzeltechnik</button>
+            </a>
+
+
+            <a href="Kommunikationstools.html">
+                <button>Kommunikationstools</button>
+            </a>
+
+
+            <a href="Berechnung.html">
+                <button>Online Berechnung</button>
+            </a>
+
+
+            <a href="Komponenten.html">
+                <button>Package Komponenten</button>
+            </a>
+
+
+            <a href="Systemübersichtsplan.html">
+                <button>Systemübersichtsplan digitalisieren</button>
+            </a>
+
+
+            <a href="PläneDigitalisieren.html">
+                <button>Pläne digitalisieren</button>
+            </a>
+
+
+            <a href="Planverzeichnis.html">
+                <button>Planverzeichnis Digital erstellen</button>
+            </a>
+            <a href="pdf-editor.html">
+                <button>PDF Bearbeiten</button>
+            </a>
+
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script>
+        $(".btn_container").click(function() {
+            $(".over_lay").css({
+                width: "100%"
+            });
+            $(".list_items_container").css({
+                left: "0px"
+            });
+        });
+        $(".over_lay, .close_btn").click(function() {
+            $(".over_lay").css({
+                width: "0px"
+            });
+            $(".list_items_container").css({
+                left: "-300px"
+            });
+        });
+    </script>
+    <script src="treeview.js">
+    </script>
+
+
+</body>
+
+</html>

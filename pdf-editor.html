@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>PDF Annotation And Drawing Markup Plugin Example</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+    <style>
+        body {
+            background-color: rgb(82, 86, 89);
+        }
+        /* canvas,
+        .canvas-container {
+            -webkit-box-shadow: 10px 10px 5px 0px rgba(0, 0, 0, 0.75);
+            -moz-box-shadow: 10px 10px 5px 0px rgba(0, 0, 0, 0.75);
+            box-shadow: 10px 10px 5px 0px rgba(0, 0, 0, 0.75);
+        } */
+        
+        #pdf-container {
+            margin-top: 130px;
+            padding-left: 10px;
+            text-align: center;
+        }
+        
+        button:focus {
+            outline: 0;
+        }
+        
+        .toolbar .tool {
+            display: inline-block;
+            color: #fff;
+            height: 100%;
+            padding-top: 10px;
+            padding-left: 10px;
+            margin-right: 5px;
+        }
+        
+        label,
+        select,
+        input {
+            width: auto !important;
+            height: auto !important;
+            padding: 0!important;
+        }
+        
+        input {
+            width: 50px !important;
+        }
+        
+        .color-tool {
+            height: 25px;
+            width: 25px;
+            border-radius: 25px;
+            border: 0;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .color-tool.active {
+            -webkit-box-shadow: 3px 4px 5px 0px rgba(0, 0, 0, 0.75);
+            -moz-box-shadow: 3px 4px 5px 0px rgba(0, 0, 0, 0.75);
+            box-shadow: 3px 4px 5px 0px rgba(0, 0, 0, 0.75);
+        }
+        
+        .tool:nth-last-child(1) {
+            float: right;
+        }
+        
+        .tool .tool-button {
+            background-color: rgb(50, 54, 57);
+            border: 1px solid rgb(50, 54, 57);
+            color: #fff;
+            cursor: pointer;
+        }
+        
+        .tool .tool-button:hover,
+        .tool .tool-button.active {
+            background-color: rgb(82, 86, 89);
+            border-color: rgb(82, 86, 89);
+        }
+        
+        .index {
+            z-index: 9999;
+        }
+    </style>
+    <style>
+        canvas,
+        .canvas-container {
+            margin-bottom: 25px;
+        }
+        
+        .canvas-container {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="#">PDF-Editor</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse " id="navbarSupportedContent">
+
+            <ul class="navbar-nav mr-auto d-flex justify-content-center align-items-center ">
+
+                <li class="nav-item d-flex justify-content-center align-items-center ">
+                    <label for="" class="px-2 my-2">Brush size:</label>
+                    <input type="number" class="form-control text-right" value="1" id="brush-size" max="50">
+                </li>
+                <li class="nav-item nav-item d-flex justify-content-center align-items-center">
+                    <label for="" class="px-2 my-2 ">Font-size</label>
+                    <select id="font-size" class="form-control">
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="16" selected>16</option>
+                    <option value="18">18</option>
+                    <option value="24">24</option>
+                    <option value="32">32</option>
+                    <option value="48">48</option>
+                    <option value="64">64</option>
+                    <option value="72">72</option>
+                    <option value="108">108</option>
+                </select>
+                </li>
+                <li class="nav-item ">
+                    <p>
+                        <button class="btn d-flex justify-content-center align-items-center w-auto my-3  mx-1" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                          Color
+                        </button>
+                    </p>
+                    <div class="collapse position-absolute index" id="collapseExample">
+                        <div class="card card-body ">
+                            <button class="color-tool active" style="background-color: #212121; border: 4px solid #ffffff;"></button>
+                            <button class="color-tool active" style="background-color: red; border: 4px solid #ffffff;"></button>
+                            <button class="color-tool active" style="background-color: blue; border: 4px solid #ffffff;"></button>
+                            <button class="color-tool active" style="background-color: green; border: 4px solid #ffffff;"></button>
+                            <button class="color-tool active" style="background-color: yellow; border: 4px solid #ffffff;"></button> </div>
+                    </div>
+
+                </li>
+                <li class="nav-item">
+                    <p>
+                        <button class="btn d-flex justify-content-center align-items-center my-3  " type="button" data-toggle="collapse" data-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample">
+                          tools
+                        </button>
+                    </p>
+                    <div class="collapse position-absolute index" id="collapseExample2">
+                        <div class="card card-body ">
+                            <div class="row">
+                                <div class="col-6" style="height: 200px; overflow-y: scroll;">
+                                    <div class="tool">
+                                        <button class="tool-button active" style="border: 2px solid #ffffff;"><i class="fa fa-hand-paper-o" title="Free Hand" onclick="enableSelector(event)"> Frei Bewegen</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" style="border: 2px solid #ffffff;"><i class="fa fa-pencil" title="Pencil" onclick="enablePencil(event)">Unbeschränkt Malen</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" style="border: 2px solid #ffffff;"><i class="fa fa-solid fa-minus" title="Add Line" onclick="enableAddLine(event)"> Normale Linie</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" style="border: 2px solid #ffffff;"><i class="fa fa-square-o" title="Add rectangle" onclick="enableRectangle(event)"> Rechteck</i></button>
+                                    </div>
+
+                                    <div class="tool" >
+                                        <button class="tool-button" onclick="addTool1(event)" style="border: 2px solid #ffffff;">Masterswitch-Blau </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool2(event)" style="border: 2px solid #ffffff;">ZN Router Blau & Grau </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool3(event)" style="border: 2px solid #ffffff;">LWL Gestell blau </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool4(event)" style="border: 2px solid #ffffff;">Schrank </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool5(event)" style="border: 2px solid #ffffff;">LWL-Patchfeld</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool6(event)" style="border: 2px solid #ffffff;">Antenne </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool7(event)" style="border: 2px solid #ffffff;">MSD </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool8(event)" style="border: 2px solid #ffffff;">Anschlussbox </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool9(event)" style="border: 2px solid #ffffff;">FIST</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool10(event)" style="border: 2px solid #ffffff;">Hauptverteiler</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool11(event)" style="border: 2px solid #ffffff;  margin-right: 200px;">Leitungsabschluss</i></button>
+                                    </div>
+                                </div>
+                                <div class="col-6" style="height: 200px; overflow-y: scroll;">
+                                    <div class="tool" style="border: 2px solid #ffffff;">
+                                        <button class="tool-button"><i class="fa fa-font" title="Add Text" onclick="enableAddText(event)"></i></button>
+                                    </div>
+                                    <div class="tool" style="border: 2px solid #ffffff;">
+                                        <button class="tool-button"><i class="fa fa-long-arrow-right" title="Add Arrow" onclick="enableAddArrow(event)"> Pfeil</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="enableAddDashLine(event)" style="border: 2px solid #ffffff;">Punktierte Linie 1</button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="enableAddDash2Line(event)" style="border: 2px solid #ffffff;">Punktierte Linie 2</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool12(event)" style="border: 2px solid #ffffff;">XMC 25 </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool13(event)" style="border: 2px solid #ffffff;">Multiplexer allgemein</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool14(event)" style="border: 2px solid #ffffff;">Rechner</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool15(event)" style="border: 2px solid #ffffff;">DB WAN mit Firewall</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool16(event)" style="border: 2px solid #ffffff;">Kamera Type 1b-4K </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool17(event)" style="border: 2px solid #ffffff;">Kamera Type 2-4K</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool18(event)" style="border: 2px solid #ffffff;">4-Kameras Type 3</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool19(event)" style="border: 2px solid #ffffff;">Repeater</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool20(event)" style="border: 2px solid #ffffff;">Induktivität </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool21(event)" style="border: 2px solid #ffffff;">2x LWL Patchkabel</i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool22(event)" style="border: 2px solid #ffffff;  margin-right: 220px;">Muffenschrank </i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+
+
+                        </div>
+                    </div>
+
+                </li>
+                <li class="nav-item">
+                    <p>
+                        <button class="btn d-flex justify-content-center align-items-center my-3  " type="button" data-toggle="collapse" data-target="#collapseExample3" aria-expanded="false" aria-controls="collapseExample">
+                          tools2
+                        </button>
+                    </p>
+                    <div class="collapse position-absolute index" id="collapseExample3">
+                        <div class="card card-body ">
+                            <div class="row">
+                                <div class="col-6" style="height: 200px; overflow-y: scroll;">
+
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool23(event)" style="border: 2px solid #ffffff;">Empfangstation Antenne </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool24(event)" style="border: 2px solid #ffffff;">Potentialausgleich </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool25(event)" style="border: 2px solid #ffffff;">Steckverbinder </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool26(event)" style="border: 2px solid #ffffff;">Erdungsbuchse </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool27(event)" style="border: 2px solid #ffffff;">Backbone DB Netz AG </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool28(event)" style="border: 2px solid #ffffff;">FGB </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool29(event)" style="border: 2px solid #ffffff;">LWL-Gestell grau </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool30(event)" style="border: 2px solid #ffffff;">Einfühungsschacht </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool31(event)" style="border: 2px solid #ffffff; margin-right: 200px;">Schrank UT-Technik</i></button>
+                                    </div>
+
+
+                                </div>
+                                <div class="col-6" style="height: 200px; overflow-y: scroll;">
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool32(event)" style="border: 2px solid #ffffff;">RN Router Blau BBIP-Schrank Regionalesnetz </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool33(event)" style="border: 2px solid #ffffff;">RN Router Grau BBIP-Schrank Regionalesnetz </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool34(event)" style="border: 2px solid #ffffff;">SPO 1410 </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool35(event)" style="border: 2px solid #ffffff;">Directional Inbulding Antenne </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool36(event)" style="border: 2px solid #ffffff;">3-10dB Splitter </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool37(event)" style="border: 2px solid #ffffff;">DC Blocker </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool38(event)" style="border: 2px solid #ffffff;">Filter </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool39(event)" style="border: 2px solid #ffffff;">LWL-gestell </i></button>
+                                    </div>
+                                    <div class="tool">
+                                        <button class="tool-button" onclick="addTool40(event)" style="border: 2px solid #ffffff;  margin-right: 255px;">Kamera </i></button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+
+
+
+
+
+
+
+                        </div>
+                    </div>
+
+                </li>
+                <li class="nav-item ml-4 mr-1">
+                    <div class="tool">
+                        <button class="tool-button"><i class="fa fa-picture-o" title="Add an Image" onclick="addImage(event)"></i></button>
+                    </div>
+                </li>
+                <li class="nav-item mx-1">
+                    <div class="tool">
+                        <button class="btn btn-danger btn-sm mx-2" onclick="deleteSelectedObject(event)"><i class="fa fa-trash"></i></button>
+                    </div>
+                </li>
+                <li class="nav-item mx-1">
+                    <div class="tool">
+                        <button class="btn btn-danger btn-sm " onclick="clearPage()">Clear Page</button>
+                    </div>
+                </li>
+
+
+
+            </ul>
+            <ul class="navbar-nav ml-auto d-flex justify-content-center align-items-center">
+                <li class="nav-item">
+                    <div class="tool">
+                        <button class="btn btn-light btn-sm buttonn"> Upload</button>
+                        <button class="btn btn-light btn-sm" onclick="savePDF()"><i class="fa fa-save"></i> Save</button>
+                    </div>
+        </div>
+        </li>
+        </ul>
+        </div>
+    </nav>
+    <input type="file" name="uploadPdf" class="input" hidden id="uploadPdf" style="position: absolute; background: #fff;">
+
+    <div id="pdf-container"></div>
+
+    <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">PDF annotation data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+                </div>
+                <div class="modal-body">
+                    <pre class="prettyprint lang-json linenums">
+				</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.3.0/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.2.0/jspdf.umd.min.js"></script>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+    <script>
+        let buttonn = document.querySelector('.buttonn')
+        let input = document.querySelector('.input')
+        buttonn.onclick = () => {
+                input.click()
+            }
+            /**
+             * From: https://blog.thirdrocktechkno.com/how-to-draw-an-arrow-using-html-5-canvas-and-fabricjs-9500c3f50ecb
+             */
+            // Extended fabric line class
+        fabric.LineArrow = fabric.util.createClass(fabric.Line, {
+
+            type: 'lineArrow',
+
+            initialize: function(element, options) {
+                options || (options = {});
+                this.callSuper('initialize', element, options);
+            },
+
+            toObject: function() {
+                return fabric.util.object.extend(this.callSuper('toObject'));
+            },
+
+            _render: function(ctx) {
+                this.callSuper('_render', ctx);
+
+                // do not render if width/height are zeros or object is not visible
+                if (this.width === 0 || this.height === 0 || !this.visible) return;
+
+                ctx.save();
+
+                var xDiff = this.x2 - this.x1;
+                var yDiff = this.y2 - this.y1;
+                var angle = Math.atan2(yDiff, xDiff);
+                ctx.translate((this.x2 - this.x1) / 2, (this.y2 - this.y1) / 2);
+                ctx.rotate(angle);
+                ctx.beginPath();
+                //move 10px in front of line to start the arrow so it does not have the square line end showing in front (0,0)
+                ctx.moveTo(10, 0);
+                ctx.lineTo(-20, 15);
+                ctx.lineTo(-20, -15);
+                ctx.closePath();
+                ctx.fillStyle = this.stroke;
+                ctx.fill();
+
+                ctx.restore();
+
+            }
+        });
+
+        fabric.LineArrow.fromObject = function(object, callback) {
+            callback && callback(new fabric.LineArrow([object.x1, object.y1, object.x2, object.y2], object));
+        };
+
+        fabric.LineArrow.async = true;
+
+
+        var Arrow = (function() {
+            function Arrow(canvas, color, callback) {
+                this.canvas = canvas;
+                this.className = 'Arrow';
+                this.isDrawing = false;
+                this.color = color;
+                this.callback = callback;
+                this.bindEvents();
+            }
+
+            Arrow.prototype.bindEvents = function() {
+                var inst = this;
+                inst.canvas.on('mouse:down', function(o) {
+                    inst.onMouseDown(o);
+                });
+                inst.canvas.on('mouse:move', function(o) {
+                    inst.onMouseMove(o);
+                });
+                inst.canvas.on('mouse:up', function(o) {
+                    inst.onMouseUp(o);
+                });
+                inst.canvas.on('object:moving', function(o) {
+                    inst.disable();
+                })
+            }
+
+            Arrow.prototype.unBindEventes = function() {
+                var inst = this;
+                inst.canvas.off('mouse:down');
+                inst.canvas.off('mouse:up');
+                inst.canvas.off('mouse:move');
+                inst.canvas.off('object:moving');
+            }
+
+            Arrow.prototype.onMouseUp = function(o) {
+                var inst = this;
+                inst.disable();
+                inst.unBindEventes();
+                if (inst.callback) inst.callback();
+            };
+
+            Arrow.prototype.onMouseMove = function(o) {
+                var inst = this;
+                if (!inst.isEnable()) {
+                    return;
+                }
+
+                var pointer = inst.canvas.getPointer(o.e);
+                var activeObj = inst.canvas.getActiveObject();
+                activeObj.set({
+                    x2: pointer.x,
+                    y2: pointer.y
+                });
+                activeObj.setCoords();
+                inst.canvas.renderAll();
+            };
+
+            Arrow.prototype.onMouseDown = function(o) {
+                var inst = this;
+                inst.enable();
+                var pointer = inst.canvas.getPointer(o.e);
+
+                var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+                var line = new fabric.LineArrow(points, {
+                    strokeWidth: 5,
+                    fill: (inst.color) ? inst.color : 'red',
+                    stroke: (inst.color) ? inst.color : 'red',
+                    originX: 'center',
+                    originY: 'center',
+                    hasBorders: false,
+                    hasControls: true,
+                    selectable: true
+                });
+
+                inst.canvas.add(line).setActiveObject(line);
+            };
+
+            Arrow.prototype.isEnable = function() {
+                return this.isDrawing;
+            }
+
+            Arrow.prototype.enable = function() {
+                this.isDrawing = true;
+            }
+
+            Arrow.prototype.disable = function() {
+                this.isDrawing = false;
+            }
+
+            return Arrow;
+        }());
+    </script>
+    <script>
+        fabric.Dash2Line = fabric.util.createClass(fabric.Line, {
+
+            type: 'Dash2line',
+
+            initialize: function(element, options) {
+                options || (options = {});
+                this.callSuper('initialize', element, options);
+            },
+        });
+
+
+
+        fabric.Dash2Line.async = true;
+
+
+        var Dash2 = (function() {
+            function Dash2(canvas, color, callback) {
+                this.canvas = canvas;
+                this.className = 'Dash2';
+                this.isDrawing = false;
+                this.color = color;
+                this.callback = callback;
+                this.bindEvents();
+            }
+
+            Dash2.prototype.bindEvents = function() {
+                var inst = this;
+                inst.canvas.on('mouse:down', function(o) {
+                    inst.onMouseDown(o);
+                });
+                inst.canvas.on('mouse:move', function(o) {
+                    inst.onMouseMove(o);
+                });
+                inst.canvas.on('mouse:up', function(o) {
+                    inst.onMouseUp(o);
+                });
+                inst.canvas.on('object:moving', function(o) {
+                    inst.disable();
+                })
+            }
+
+            Dash2.prototype.unBindEventes = function() {
+                var inst = this;
+                inst.canvas.off('mouse:down');
+                inst.canvas.off('mouse:up');
+                inst.canvas.off('mouse:move');
+                inst.canvas.off('object:moving');
+            }
+
+            Dash2.prototype.onMouseUp = function(o) {
+                var inst = this;
+                inst.disable();
+                inst.unBindEventes();
+                if (inst.callback) inst.callback();
+            };
+
+            Dash2.prototype.onMouseMove = function(o) {
+                var inst = this;
+                if (!inst.isEnable()) {
+                    return;
+                }
+
+                var pointer = inst.canvas.getPointer(o.e);
+                var activeObj = inst.canvas.getActiveObject();
+                activeObj.set({
+                    x2: pointer.x,
+                    y2: pointer.y
+                });
+                activeObj.setCoords();
+                inst.canvas.renderAll();
+            };
+
+            Dash2.prototype.onMouseDown = function(o) {
+                var inst = this;
+                inst.enable();
+                var pointer = inst.canvas.getPointer(o.e);
+
+                var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+                var line = new fabric.LineLine(points, {
+                    strokeWidth: 5,
+                    fill: (inst.color) ? inst.color : 'red',
+                    stroke: (inst.color) ? inst.color : 'red',
+                    strokeDashArray: [50, 15, 5, 15], // set stroke-dasharray attribute
+                    x1: 10,
+                    y1: 190,
+                    x2: 190,
+                    y2: 190, // set x1, y1, x2, y2 coordinates
+                    originX: 'center',
+                    originY: 'center',
+                    hasBorders: false,
+                    hasControls: true,
+                    selectable: true
+                });
+
+                inst.canvas.add(line).setActiveObject(line);
+            };
+
+            Dash2.prototype.isEnable = function() {
+                return this.isDrawing;
+            }
+
+            Dash2.prototype.enable = function() {
+                this.isDrawing = true;
+            }
+
+            Dash2.prototype.disable = function() {
+                this.isDrawing = false;
+            }
+
+            return Dash2;
+        }());
+    </script>
+
+    <!--------------------------------------------------------------------------------------------------------------------- -->
+    <script>
+        fabric.DashLine = fabric.util.createClass(fabric.Line, {
+
+            type: 'Dashline',
+
+            initialize: function(element, options) {
+                options || (options = {});
+                this.callSuper('initialize', element, options);
+            },
+        });
+
+
+
+        fabric.DashLine.async = true;
+
+
+        var Dash = (function() {
+            function Dash(canvas, color, callback) {
+                this.canvas = canvas;
+                this.className = 'Dash';
+                this.isDrawing = false;
+                this.color = color;
+                this.callback = callback;
+                this.bindEvents();
+            }
+
+            Dash.prototype.bindEvents = function() {
+                var inst = this;
+                inst.canvas.on('mouse:down', function(o) {
+                    inst.onMouseDown(o);
+                });
+                inst.canvas.on('mouse:move', function(o) {
+                    inst.onMouseMove(o);
+                });
+                inst.canvas.on('mouse:up', function(o) {
+                    inst.onMouseUp(o);
+                });
+                inst.canvas.on('object:moving', function(o) {
+                    inst.disable();
+                })
+            }
+
+            Dash.prototype.unBindEventes = function() {
+                var inst = this;
+                inst.canvas.off('mouse:down');
+                inst.canvas.off('mouse:up');
+                inst.canvas.off('mouse:move');
+                inst.canvas.off('object:moving');
+            }
+
+            Dash.prototype.onMouseUp = function(o) {
+                var inst = this;
+                inst.disable();
+                inst.unBindEventes();
+                if (inst.callback) inst.callback();
+            };
+
+            Dash.prototype.onMouseMove = function(o) {
+                var inst = this;
+                if (!inst.isEnable()) {
+                    return;
+                }
+
+                var pointer = inst.canvas.getPointer(o.e);
+                var activeObj = inst.canvas.getActiveObject();
+                activeObj.set({
+                    x2: pointer.x,
+                    y2: pointer.y
+                });
+                activeObj.setCoords();
+                inst.canvas.renderAll();
+            };
+
+            Dash.prototype.onMouseDown = function(o) {
+                var inst = this;
+                inst.enable();
+                var pointer = inst.canvas.getPointer(o.e);
+
+                var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+                var line = new fabric.DashLine(points, {
+                    strokeWidth: 5,
+                    fill: (inst.color) ? inst.color : 'red',
+                    stroke: (inst.color) ? inst.color : 'red',
+                    originX: 'center',
+                    originY: 'center',
+                    hasBorders: false,
+                    hasControls: true,
+                    selectable: true,
+                    strokeDashArray: [40, 10] // set the dash pattern
+                });
+
+                inst.canvas.add(line).setActiveObject(line);
+            };
+
+            Dash.prototype.isEnable = function() {
+                return this.isDrawing;
+            }
+
+            Dash.prototype.enable = function() {
+                this.isDrawing = true;
+            }
+
+            Dash.prototype.disable = function() {
+                this.isDrawing = false;
+            }
+
+            return Dash;
+        }());
+    </script>
+    <!-- ------------------------------------------------------------------------------------------------------------------------------ -->
+    <script>
+        /**
+         * From: https://blog.thirdrocktechkno.com/how-to-draw-an-arrow-using-html-5-canvas-and-fabricjs-9500c3f50ecb
+         */
+
+        // Extended fabric line class
+        fabric.LineLine = fabric.util.createClass(fabric.Line, {
+
+            type: 'lineLine',
+
+            initialize: function(element, options) {
+                options || (options = {});
+                this.callSuper('initialize', element, options);
+            },
+
+            toObject: function() {
+                return fabric.util.object.extend(this.callSuper('toObject'));
+            },
+
+        });
+
+        fabric.LineLine.fromObject = function(object, callback) {
+            callback && callback(new fabric.LineLine([object.x1, object.y1, object.x2, object.y2], object));
+        };
+
+        fabric.LineLine.async = true;
+
+
+        var Line = (function() {
+            function Line(canvas, color, callback) {
+                this.canvas = canvas;
+                this.className = 'Line';
+                this.isDrawing = false;
+                this.color = color;
+                this.callback = callback;
+                this.bindEvents();
+            }
+
+            Line.prototype.bindEvents = function() {
+                var inst = this;
+                inst.canvas.on('mouse:down', function(o) {
+                    inst.onMouseDown(o);
+                });
+                inst.canvas.on('mouse:move', function(o) {
+                    inst.onMouseMove(o);
+                });
+                inst.canvas.on('mouse:up', function(o) {
+                    inst.onMouseUp(o);
+                });
+                inst.canvas.on('object:moving', function(o) {
+                    inst.disable();
+                })
+            }
+
+            Line.prototype.unBindEventes = function() {
+                var inst = this;
+                inst.canvas.off('mouse:down');
+                inst.canvas.off('mouse:up');
+                inst.canvas.off('mouse:move');
+                inst.canvas.off('object:moving');
+            }
+
+            Line.prototype.onMouseUp = function(o) {
+                var inst = this;
+                inst.disable();
+                inst.unBindEventes();
+                if (inst.callback) inst.callback();
+            };
+
+            Line.prototype.onMouseMove = function(o) {
+                var inst = this;
+                if (!inst.isEnable()) {
+                    return;
+                }
+
+                var pointer = inst.canvas.getPointer(o.e);
+                var activeObj = inst.canvas.getActiveObject();
+                activeObj.set({
+                    x2: pointer.x,
+                    y2: pointer.y
+                });
+                activeObj.setCoords();
+                inst.canvas.renderAll();
+            };
+
+            Line.prototype.onMouseDown = function(o) {
+                var inst = this;
+                inst.enable();
+                var pointer = inst.canvas.getPointer(o.e);
+
+                var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+                var line = new fabric.LineLine(points, {
+                    strokeWidth: 5,
+                    fill: (inst.color) ? inst.color : 'red',
+                    stroke: (inst.color) ? inst.color : 'red',
+                    originX: 'center',
+                    originY: 'center',
+                    hasBorders: false,
+                    hasControls: true,
+                    selectable: true
+                });
+
+                inst.canvas.add(line).setActiveObject(line);
+            };
+
+            Line.prototype.isEnable = function() {
+                return this.isDrawing;
+            }
+
+            Line.prototype.enable = function() {
+                this.isDrawing = true;
+            }
+
+            Line.prototype.disable = function() {
+                this.isDrawing = false;
+            }
+
+            return Line;
+        }());
+    </script>
+    <script>
+        /**
+         * PDFAnnotate v1.0.1
+         * Author: Ravisha Heshan
+         */
+
+        var PDFAnnotate = function(container_id, url, options = {}) {
+            this.number_of_pages = 0;
+            this.pages_rendered = 0;
+            this.active_tool = 1; // 1 - Free hand, 2 - Text, 3 - Arrow, 4 - Rectangle
+            this.fabricObjects = [];
+            this.fabricObjectsData = [];
+            this.color = '#212121';
+            this.borderColor = '#000000';
+            this.borderSize = 1;
+            this.font_size = 16;
+            this.active_canvas = 0;
+            this.container_id = container_id;
+            this.url = url;
+            this.pageImageCompression = options.pageImageCompression ?
+                options.pageImageCompression.toUpperCase() :
+                "NONE";
+            var inst = this;
+
+            var loadingTask = pdfjsLib.getDocument(this.url);
+            loadingTask.promise.then(function(pdf) {
+                var scale = options.scale ? options.scale : 1.3;
+                inst.number_of_pages = pdf.numPages;
+
+                for (var i = 1; i <= pdf.numPages; i++) {
+                    pdf.getPage(i).then(function(page) {
+                        var viewport = page.getViewport({
+                            scale: scale
+                        });
+                        var canvas = document.createElement('canvas');
+                        document.getElementById(inst.container_id).appendChild(canvas);
+                        canvas.className = 'pdf-canvas';
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        context = canvas.getContext('2d');
+
+                        var renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+                        var renderTask = page.render(renderContext);
+                        renderTask.promise.then(function() {
+                            $('.pdf-canvas').each(function(index, el) {
+                                $(el).attr('id', 'page-' + (index + 1) + '-canvas');
+                            });
+                            inst.pages_rendered++;
+                            if (inst.pages_rendered == inst.number_of_pages) inst.initFabric();
+                        });
+                    });
+                }
+            }, function(reason) {
+                console.error(reason);
+            });
+
+            this.initFabric = function() {
+                var inst = this;
+                let canvases = $('#' + inst.container_id + ' canvas')
+                canvases.each(function(index, el) {
+                    var background = el.toDataURL("image/png");
+                    var fabricObj = new fabric.Canvas(el.id, {
+                        freeDrawingBrush: {
+                            width: 1,
+                            color: inst.color
+                        }
+                    });
+                    inst.fabricObjects.push(fabricObj);
+                    if (typeof options.onPageUpdated == 'function') {
+                        fabricObj.on('object:added', function() {
+                            var oldValue = Object.assign({}, inst.fabricObjectsData[index]);
+                            inst.fabricObjectsData[index] = fabricObj.toJSON()
+                            options.onPageUpdated(index + 1, oldValue, inst.fabricObjectsData[index])
+                        })
+                    }
+                    fabricObj.setBackgroundImage(background, fabricObj.renderAll.bind(fabricObj));
+                    $(fabricObj.upperCanvasEl).click(function(event) {
+                        inst.active_canvas = index;
+                        inst.fabricClickHandler(event, fabricObj);
+                    });
+                    fabricObj.on('after:render', function() {
+                        inst.fabricObjectsData[index] = fabricObj.toJSON()
+                        fabricObj.off('after:render')
+                    })
+
+                    if (index === canvases.length - 1 && typeof options.ready === 'function') {
+                        options.ready()
+                    }
+                });
+            }
+
+            this.fabricClickHandler = function(event, fabricObj) {
+                var inst = this;
+                if (inst.active_tool == 2) {
+                    var text = new fabric.IText('Sample text', {
+                        left: event.clientX - fabricObj.upperCanvasEl.getBoundingClientRect().left,
+                        top: event.clientY - fabricObj.upperCanvasEl.getBoundingClientRect().top,
+                        fill: inst.color,
+                        fontSize: inst.font_size,
+                        selectable: true
+                    });
+                    fabricObj.add(text);
+                    inst.active_tool = 0;
+                }
+            }
+        }
+
+        PDFAnnotate.prototype.enableSelector = function() {
+            var inst = this;
+            inst.active_tool = 0;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = false;
+                });
+            }
+        }
+
+        PDFAnnotate.prototype.enablePencil = function() {
+            var inst = this;
+            inst.active_tool = 1;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = true;
+                });
+            }
+        }
+
+        PDFAnnotate.prototype.enableAddText = function() {
+            var inst = this;
+            inst.active_tool = 2;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = false;
+                });
+            }
+        }
+
+        PDFAnnotate.prototype.enableRectangle = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            inst.active_tool = 4;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = false;
+                });
+            }
+
+            var rect = new fabric.Rect({
+                width: 100,
+                height: 100,
+                fill: inst.color,
+                stroke: inst.borderColor,
+                strokeSize: inst.borderSize
+            });
+            fabricObj.add(rect);
+        }
+
+        PDFAnnotate.prototype.enableAddArrow = function() {
+            var inst = this;
+            inst.active_tool = 3;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = false;
+                    new Arrow(fabricObj, inst.color, function() {
+                        inst.active_tool = 0;
+                    });
+                });
+            }
+        }
+        PDFAnnotate.prototype.enableAddDash2Line = function() {
+            var inst = this;
+            inst.active_tool = 3;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = false;
+                    new Dash2(fabricObj, inst.color, function() {
+                        inst.active_tool = 0;
+                    });
+                });
+            }
+        }
+        PDFAnnotate.prototype.enableAddDashLine = function() {
+            var inst = this;
+            inst.active_tool = 3;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = false;
+                    new Dash(fabricObj, inst.color, function() {
+                        inst.active_tool = 0;
+                    });
+                });
+            }
+        }
+        PDFAnnotate.prototype.enableAddLine = function() {
+            var inst = this;
+            inst.active_tool = 3;
+            if (inst.fabricObjects.length > 0) {
+                $.each(inst.fabricObjects, function(index, fabricObj) {
+                    fabricObj.isDrawingMode = false;
+                    new Line(fabricObj, inst.color, function() {
+                        inst.active_tool = 0;
+                    });
+                });
+            }
+        }
+        PDFAnnotate.prototype.addImageToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+
+            if (fabricObj) {
+                var inputElement = document.createElement("input");
+                inputElement.type = 'file'
+                inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
+                inputElement.onchange = function() {
+                    var reader = new FileReader();
+                    reader.addEventListener("load", function() {
+                        inputElement.remove()
+                        var image = new Image();
+                        image.onload = function() {
+                            fabricObj.add(new fabric.Image(image))
+                        }
+                        image.src = this.result;
+                    }, false);
+                    reader.readAsDataURL(inputElement.files[0]);
+                }
+                document.getElementsByTagName('body')[0].appendChild(inputElement)
+                inputElement.click()
+            }
+        }
+        PDFAnnotate.prototype.addTool1ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool1.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool2ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool2.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool3ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool3.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool4ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool4.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool5ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool5.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool6ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool6.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool7ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool7.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool8ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool8.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool9ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool9.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool10ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool10.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool11ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool11.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool12ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool12.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool13ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool13.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool14ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool14.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool15ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool15.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool16ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool16.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool17ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool17.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool18ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool18.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool19ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool19.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool20ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool20.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool21ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool21.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool22ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool22.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool23ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool23.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool24ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool24.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool25ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool25.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool26ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool26.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool27ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool27.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool28ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool28.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool29ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool29.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool30ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool30.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool31ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool31.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool32ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool32.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool33ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool33.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool34ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool34.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool35ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool35.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool36ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool36.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool37ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool37.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool38ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool38.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool39ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+                var imageUrl = "Image-Tools/tool39.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+        PDFAnnotate.prototype.addTool40ToCanvas = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            if (fabricObj) {
+
+                var imageUrl = "Image-Tools/tool40.png"; // replace with the path to your image file
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    fabricObj.add(img);
+                });
+            }
+        }
+
+        PDFAnnotate.prototype.deleteSelectedObject = function() {
+            var inst = this;
+            var activeObject = inst.fabricObjects[inst.active_canvas].getActiveObject();
+            if (activeObject) {
+                if (confirm('Are you sure ?')) inst.fabricObjects[inst.active_canvas].remove(activeObject);
+            }
+        }
+
+        PDFAnnotate.prototype.savePdf = function(fileName) {
+            var inst = this;
+            var doc = new jspdf.jsPDF();
+            if (typeof fileName === 'undefined') {
+                fileName = `${new Date().getTime()}.pdf`;
+            }
+
+            inst.fabricObjects.forEach(function(fabricObj, index) {
+                if (index != 0) {
+                    doc.addPage();
+                    doc.setPage(index + 1);
+                }
+                doc.addImage(
+                    fabricObj.toDataURL({
+                        format: 'png'
+                    }),
+                    inst.pageImageCompression == "NONE" ? "PNG" : "JPEG",
+                    0,
+                    0,
+                    doc.internal.pageSize.getWidth(),
+                    doc.internal.pageSize.getHeight(),
+                    `page-${index + 1}`, ["FAST", "MEDIUM", "SLOW"].indexOf(inst.pageImageCompression) >= 0 ?
+                    inst.pageImageCompression :
+                    undefined
+                );
+                if (index === inst.fabricObjects.length - 1) {
+                    doc.save(fileName);
+                }
+            })
+        }
+
+        PDFAnnotate.prototype.setBrushSize = function(size) {
+            var inst = this;
+            $.each(inst.fabricObjects, function(index, fabricObj) {
+                fabricObj.freeDrawingBrush.width = size;
+            });
+        }
+
+        PDFAnnotate.prototype.setColor = function(color) {
+            var inst = this;
+            inst.color = color;
+            $.each(inst.fabricObjects, function(index, fabricObj) {
+                fabricObj.freeDrawingBrush.color = color;
+            });
+        }
+
+        PDFAnnotate.prototype.setBorderColor = function(color) {
+            var inst = this;
+            inst.borderColor = color;
+        }
+
+        PDFAnnotate.prototype.setFontSize = function(size) {
+            this.font_size = size;
+        }
+
+        PDFAnnotate.prototype.setBorderSize = function(size) {
+            this.borderSize = size;
+        }
+
+        PDFAnnotate.prototype.clearActivePage = function() {
+            var inst = this;
+            var fabricObj = inst.fabricObjects[inst.active_canvas];
+            var bg = fabricObj.backgroundImage;
+            if (confirm('Are you sure?')) {
+                fabricObj.clear();
+                fabricObj.setBackgroundImage(bg, fabricObj.renderAll.bind(fabricObj));
+            }
+        }
+
+        PDFAnnotate.prototype.serializePdf = function() {
+            var inst = this;
+            return JSON.stringify(inst.fabricObjects, null, 4);
+        }
+
+
+
+        PDFAnnotate.prototype.loadFromJSON = function(jsonData) {
+            var inst = this;
+            $.each(inst.fabricObjects, function(index, fabricObj) {
+                if (jsonData.length > index) {
+                    fabricObj.loadFromJSON(jsonData[index], function() {
+                        inst.fabricObjectsData[index] = fabricObj.toJSON()
+                    })
+                }
+            })
+        }
+    </script>
+    <script>
+        var pdfFile = ""
+        var fileUploaded = ""
+        var pdf = ""
+        document.getElementById("uploadPdf").addEventListener("change", (e) => {
+            fileUploaded = e.target.files[0]
+            var reader = new FileReader();
+            reader.onload = (e) => {
+                pdfFile = e.target.result;
+                pdf = new PDFAnnotate("pdf-container", pdfFile, {
+                    onPageUpdated(page, oldData, newData) {
+                        console.log(page, oldData, newData);
+                    },
+                    ready() {
+                        console.log("Plugin initialized successfully");
+                    },
+                    scale: 1.5,
+                    pageImageCompression: "MEDIUM", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+                });
+            };
+            reader.readAsDataURL(fileUploaded);
+        });
+
+        function changeActiveTool(event) {
+            var element = $(event.target).hasClass("tool-button") ?
+                $(event.target) :
+                $(event.target).parents(".tool-button").first();
+            $(".tool-button.active").removeClass("active");
+            $(element).addClass("active");
+        }
+
+        function enableSelector(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableSelector();
+        }
+
+        function enablePencil(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enablePencil();
+        }
+
+        function enableAddText(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableAddText();
+        }
+
+        function enableAddArrow(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableAddArrow();
+        }
+
+        function enableAddDash2Line(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableAddDash2Line();
+        }
+
+        function enableAddDashLine(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableAddDashLine();
+        }
+
+        function enableAddLine(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableAddLine();
+        }
+
+        function addImage(event) {
+            event.preventDefault();
+            pdf.addImageToCanvas()
+        }
+
+        function addTool1(event) {
+            event.preventDefault();
+            pdf.addTool1ToCanvas()
+        }
+
+        function addTool2(event) {
+            event.preventDefault();
+            pdf.addTool2ToCanvas()
+        }
+
+        function addTool3(event) {
+            event.preventDefault();
+            pdf.addTool3ToCanvas()
+        }
+
+        function addTool4(event) {
+            event.preventDefault();
+            pdf.addTool4ToCanvas()
+        }
+
+        function addTool5(event) {
+            event.preventDefault();
+            pdf.addTool5ToCanvas()
+        }
+
+        function addTool6(event) {
+            event.preventDefault();
+            pdf.addTool6ToCanvas()
+        }
+
+        function addTool7(event) {
+            event.preventDefault();
+            pdf.addTool7ToCanvas()
+        }
+
+        function addTool8(event) {
+            event.preventDefault();
+            pdf.addTool8ToCanvas()
+        }
+
+        function addTool9(event) {
+            event.preventDefault();
+            pdf.addTool9ToCanvas()
+        }
+
+        function addTool10(event) {
+            event.preventDefault();
+            pdf.addTool10ToCanvas()
+        }
+
+        function addTool11(event) {
+            event.preventDefault();
+            pdf.addTool11ToCanvas()
+        }
+
+        function addTool12(event) {
+            event.preventDefault();
+            pdf.addTool12ToCanvas()
+        }
+
+        function addTool13(event) {
+            event.preventDefault();
+            pdf.addTool13ToCanvas()
+        }
+
+        function addTool14(event) {
+            event.preventDefault();
+            pdf.addTool14ToCanvas()
+        }
+
+        function addTool15(event) {
+            event.preventDefault();
+            pdf.addTool15ToCanvas()
+        }
+
+        function addTool16(event) {
+            event.preventDefault();
+            pdf.addTool16ToCanvas()
+        }
+
+        function addTool17(event) {
+            event.preventDefault();
+            pdf.addTool17ToCanvas()
+        }
+
+        function addTool18(event) {
+            event.preventDefault();
+            pdf.addTool18ToCanvas()
+        }
+
+        function addTool19(event) {
+            event.preventDefault();
+            pdf.addTool19ToCanvas()
+        }
+
+        function addTool20(event) {
+            event.preventDefault();
+            pdf.addTool20ToCanvas()
+        }
+
+        function addTool21(event) {
+            event.preventDefault();
+            pdf.addTool21ToCanvas()
+        }
+
+        function addTool22(event) {
+            event.preventDefault();
+            pdf.addTool22ToCanvas()
+        }
+
+        function addTool23(event) {
+            event.preventDefault();
+            pdf.addTool23ToCanvas()
+        }
+
+        function addTool24(event) {
+            event.preventDefault();
+            pdf.addTool24ToCanvas()
+        }
+
+        function addTool25(event) {
+            event.preventDefault();
+            pdf.addTool25ToCanvas()
+        }
+
+        function addTool26(event) {
+            event.preventDefault();
+            pdf.addTool26ToCanvas()
+        }
+
+        function addTool27(event) {
+            event.preventDefault();
+            pdf.addTool27ToCanvas()
+        }
+
+        function addTool28(event) {
+            event.preventDefault();
+            pdf.addTool28ToCanvas()
+        }
+
+        function addTool29(event) {
+            event.preventDefault();
+            pdf.addTool29ToCanvas()
+        }
+
+        function addTool30(event) {
+            event.preventDefault();
+            pdf.addTool30ToCanvas()
+        }
+
+        function addTool31(event) {
+            event.preventDefault();
+            pdf.addTool31ToCanvas()
+        }
+
+        function addTool32(event) {
+            event.preventDefault();
+            pdf.addTool32ToCanvas()
+        }
+
+        function addTool33(event) {
+            event.preventDefault();
+            pdf.addTool33ToCanvas()
+        }
+
+        function addTool34(event) {
+            event.preventDefault();
+            pdf.addTool34ToCanvas()
+        }
+
+        function addTool35(event) {
+            event.preventDefault();
+            pdf.addTool35ToCanvas()
+        }
+
+        function addTool36(event) {
+            event.preventDefault();
+            pdf.addTool36ToCanvas()
+        }
+
+        function addTool37(event) {
+            event.preventDefault();
+            pdf.addTool37ToCanvas()
+        }
+
+        function addTool38(event) {
+            event.preventDefault();
+            pdf.addTool38ToCanvas()
+        }
+
+        function addTool39(event) {
+            event.preventDefault();
+            pdf.addTool39ToCanvas()
+        }
+
+        function addTool40(event) {
+            event.preventDefault();
+            pdf.addTool40ToCanvas()
+        }
+
+        function enableRectangle(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.setColor('rgba(255, 0, 0, 0.3)');
+            pdf.setBorderColor('blue');
+            pdf.enableRectangle();
+        }
+
+        function deleteSelectedObject(event) {
+            event.preventDefault();
+            pdf.deleteSelectedObject();
+        }
+
+        function savePDF() {
+            // pdf.savePdf();
+            pdf.savePdf('sample.pdf'); // save with given file name
+        }
+
+        function clearPage() {
+            pdf.clearActivePage();
+        }
+
+        function showPdfData() {
+            var string = pdf.serializePdf();
+            $('#dataModal .modal-body pre').first().text(string);
+            PR.prettyPrint();
+            $('#dataModal').modal('show');
+        }
+
+        $(function() {
+            $('.color-tool').click(function() {
+                $('.color-tool.active').removeClass('active');
+                $(this).addClass('active');
+                color = $(this).get(0).style.backgroundColor;
+                pdf.setColor(color);
+            });
+
+            $('#brush-size').change(function() {
+                var width = $(this).val();
+                pdf.setBrushSize(width);
+            });
+
+            $('#font-size').change(function() {
+                var font_size = $(this).val();
+                pdf.setFontSize(font_size);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
+
+</html>
