@@ -1,0 +1,14 @@
+@import url('treeview.css');
+.header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background-color: #D6EFC7;
+  }
+  
+img {
+    height: 50px;
+    margin-right: 20px;
+    
+  }
+ 
